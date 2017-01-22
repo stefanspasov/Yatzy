@@ -43,13 +43,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Logic\Implementations\DiceFacade.cs" />
     <Compile Include="Factories\IDiceFactory.cs" />
     <Compile Include="Factories\Implementations\DiceFactory.cs" />
+    <Compile Include="Logic\IDiceFacade.cs" />
     <Compile Include="Models\Combinations.cs" />
     <Compile Include="Models\Dice.cs" />
-    <Compile Include="Models\Game.cs" />
+    <Compile Include="Logic\Implementations\GameHandler.cs" />
     <Compile Include="Models\Player.cs" />
-    <Compile Include="Models\PlayerCard.cs" />
     <Compile Include="Yatzy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -1,0 +1,7 @@
+﻿namespace Yatzy
+{
+    class DiceFacade
+    {
+
+    }
+}
