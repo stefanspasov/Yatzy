@@ -5,7 +5,7 @@ namespace Yatzy.Logic
 {
     interface IDiceFacade
     {
-        IEnumerable<Dice> RollDice(int diceAmount);
+        IList<Dice> RollDice(int diceAmount);
 
         Dice RollSingleDice();
     }

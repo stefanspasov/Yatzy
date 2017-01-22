@@ -3,8 +3,9 @@
     class Dice
     {
         public readonly int Value;
+        public readonly string Face;
 
-        public Dice(int value)
+        public Dice(int value, string face)
         {
             if (value > 6 || value < 1)
             {
@@ -12,6 +13,7 @@
             }
 
             this.Value = value;
+            this.Face = face;
         }
     }
 }

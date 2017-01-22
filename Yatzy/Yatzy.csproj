@@ -43,9 +43,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Logic\Helpers\RandomGenerator.cs" />
     <Compile Include="Logic\Implementations\DiceFacade.cs" />
-    <Compile Include="Factories\IDiceFactory.cs" />
-    <Compile Include="Factories\Implementations\DiceFactory.cs" />
+    <Compile Include="Logic\Factories\IDiceFactory.cs" />
+    <Compile Include="Logic\Factories\Implementations\DiceFactory.cs" />
     <Compile Include="Logic\IDiceFacade.cs" />
     <Compile Include="Models\Combinations.cs" />
     <Compile Include="Models\Dice.cs" />

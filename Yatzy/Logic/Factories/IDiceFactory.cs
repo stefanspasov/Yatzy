@@ -4,6 +4,6 @@ namespace Yatzy.Factories
 {
     interface IDiceFactory
     {
-        Dice Create();
+        Dice Create(int value);
     }
 }
