@@ -1,6 +1,6 @@
 ﻿using Yatzy.Models;
 
-namespace Yatzy.Factories
+namespace Yatzy.Logic.Factories
 {
     interface IDiceFactory
     {

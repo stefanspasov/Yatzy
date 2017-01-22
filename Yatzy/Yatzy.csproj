@@ -43,6 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Logic\Factories\Implementations\PlayerFactory.cs" />
+    <Compile Include="Logic\Factories\IPlayerFactory.cs" />
     <Compile Include="Logic\Helpers\RandomGenerator.cs" />
     <Compile Include="Logic\Implementations\DiceFacade.cs" />
     <Compile Include="Logic\Factories\IDiceFactory.cs" />

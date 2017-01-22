@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading;
+using Yatzy.Logic.Factories.Implementations;
+using Yatzy.Logic.Implementations;
 
 namespace Yatzy
 {
@@ -12,19 +14,20 @@ namespace Yatzy
             {
                 while (true)
                 {
-                    Console.WriteLine("Do you want to play input game of Yatzy? Yes/No");
+                    Console.WriteLine("Do you want to play a game of Yatzy? Yes/No");
                     var input = Console.ReadLine();
                     if (!string.IsNullOrWhiteSpace(input))
                     {
                         input = input.Trim().ToLowerInvariant();
                         if (input == "yes")
                         {
+                            Console.WriteLine("How many players?");
                             var numberOfPlayersInput = Console.ReadLine();
                             int numberOfPlayers;
                             if (int.TryParse(numberOfPlayersInput, out numberOfPlayers) && numberOfPlayers > 0)
                             {
-                                // Game.Start(#ofplayers);
-
+                                var game = new GameHandler(new DiceFacade(new DiceFactory()), new PlayerFactory());
+                                game.Start(numberOfPlayers);
                             }
                             else
                             {
@@ -44,11 +47,6 @@ namespace Yatzy
             {
                 Debug.WriteLine("Suppressed exception.", ex);
             }
-        }
-
-        static void InitializeGame()
-        {
-
         }
     }
 }

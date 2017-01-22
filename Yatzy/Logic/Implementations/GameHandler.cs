@@ -1,52 +1,56 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Yatzy.Logic;
+using Yatzy.Logic.Factories;
+using Yatzy.Models;
 
-namespace Yatzy.Models
+namespace Yatzy.Logic.Implementations
 {
-    class Game
+    class GameHandler
     {
         private readonly IDiceFacade DiceFacade;
+        private readonly IPlayerFactory PlayerFactory;
+        private IList<Player> Players;
+        private const int InitialDice = 5;
+        private const int InitialRerolls = 3;
 
-        private IEnumerable<Player> Players { get; set; }
-
-        public Game(IDiceFacade diceFacade)
+        public GameHandler(IDiceFacade diceFacade, IPlayerFactory playerFactory)
         {
             this.DiceFacade = diceFacade;
+            this.PlayerFactory = playerFactory;
         }
 
         public void Start(int numberOfPlayers)
         {
-            // INTITIALIZE GAME
-            Players = new List<Player>();
-
-            foreach (var player in this.Players)
+            Players = this.PlayerFactory.GetPlayers(numberOfPlayers) as IList<Player>;
+            for (int i = 0; i < Players.Count(); i++)
             {
-                if (player.AllowedCombinations.Any())
+                if (i==Players.Count() - 1 && !Players[i].AllowedCombinations.Any(ac => ac.Value == false))
                 {
-                    MakeATurn(player);
+                    break;
                 }
+
+                MakeATurn(Players[i]);
             }
 
-            // Game end
+            Console.WriteLine("Game ends");
         }
 
         public void MakeATurn(Player player)
         {
             var result = new List<Dice>();
-            var rerollsLeft = 3;
-            var availableDiceToRoll = 5;
+            var rerollsLeft = InitialRerolls;
+            var availableDiceToRoll = InitialDice;
 
-            while(rerollsLeft > 0 || availableDiceToRoll > 0)
+            while(rerollsLeft > 0 && availableDiceToRoll > 0)
             {
                 var currentRolledDiceList = this.DiceFacade.RollDice(availableDiceToRoll);
 
                 // TODO Implement IPrinter or logger whatever - something testable
                 // TODO Print dice result in another method
-                foreach (var dice in result)
+                foreach (var dice in currentRolledDiceList)
                 {
-                    Console.Write(dice);
+                    Console.WriteLine(dice.Face + "\n");
                 }
 
                 while (true)
@@ -65,16 +69,17 @@ namespace Yatzy.Models
                         {
                             if (rerollDiceAmount < availableDiceToRoll)
                             {
-                                var positions = new int[availableDiceToRoll - rerollDiceAmount];
-                                Console.WriteLine($"Which dice do you want to keep? [0 - {availableDiceToRoll}");
+                                var positions = new int[(availableDiceToRoll - rerollDiceAmount)];
+                                Console.WriteLine($"Which dice do you want to keep? By indexes: [0 - {availableDiceToRoll-1}]");
                                 for (int i = 0; i < positions.Length; i++)
                                 {
                                     // TODO Parse to an int
                                     var dicePosition = Console.ReadKey();
+                                    Console.WriteLine();
                                     result.Add(currentRolledDiceList[i]);
                                 }
 
-                                availableDiceToRoll -= rerollDiceAmount;
+                                availableDiceToRoll -= (availableDiceToRoll - rerollDiceAmount);
                             }
                         }
 
@@ -85,16 +90,43 @@ namespace Yatzy.Models
                 rerollsLeft--;
             }
 
+            Console.WriteLine("That is your result");
+            foreach (var dice in result)
+            {
+                Console.WriteLine(dice.Face);
+                Console.WriteLine();
+            }
 
-            // Roll x dice
+            Console.WriteLine("Which score do you want to use?");
+            foreach (var item in player.AllowedCombinations.Where(ac => ac.Value == false))
+            {
+                if (item.Key == Combinations.House)
+                {
+                    result.OrderBy(d => d.Value);
+                    if ((result.GetRange(0, 2).Distinct().Count() == 1 && result.GetRange(3, 4).Distinct().Count() == 1)
+                        || (result.GetRange(0, 1).Distinct().Count() == 1 && result.GetRange(2, 4).Distinct().Count() == 1))
+                    {
+                        Console.WriteLine(item.Key.ToString());
 
-            // Ask how many to reroll
+                    }
+                }
+                else
+                {
+                    Console.WriteLine(item.Key.ToString());
+                }
+            }
 
-            // Roll x dice
+            var answer = int.Parse(Console.ReadLine());
+            if ((Combinations)answer != Combinations.House)
+            {
+                player.Score = result.Where(d => d.Value == answer).Sum(d => d.Value);
+            }
+            else
+            {
+                player.Score = result.Sum(d => d.Value);
+            }
 
-            // Which combination to be used 
-
-            // Write down the score and reduce the possible combinations
+            player.AllowedCombinations[(Combinations)answer] = true;
         }
     }
 }

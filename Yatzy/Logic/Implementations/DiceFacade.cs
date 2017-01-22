@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using Yatzy.Factories;
+﻿using System.Collections.Generic;
 using Yatzy.Logic;
+using Yatzy.Logic.Factories;
 using Yatzy.Logic.Helpers;
 using Yatzy.Models;
 
