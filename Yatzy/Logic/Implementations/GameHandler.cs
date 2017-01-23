@@ -8,7 +8,7 @@ using Yatzy.Models;
 
 namespace Yatzy.Logic.Implementations
 {
-    class GameHandler
+    public class GameHandler
     {
         private readonly IDiceFacade diceFacade;
         private readonly IPlayerFactory playerFactory;
@@ -108,11 +108,9 @@ namespace Yatzy.Logic.Implementations
             EndTurn(diceResult, player);
         }
 
-        private void EndTurn(List<Dice> diceResult, Player player)
+        public void EndTurn(List<Dice> diceResult, Player player)
         {
-            consoleWrapper.Print("That is your result:");
-            this.diceFacade.PrintDice(diceResult);
-            consoleWrapper.Print("Which score do you want to use?");
+            EndTurnPrint(diceResult);
             foreach (var item in player.AllowedCombinations.Where(ac => ac.Value == false))
             {
                 if ((item.Key == Combinations.FullHouse && this.diceFacade.IsFullHouse(diceResult)) || item.Key != Combinations.FullHouse)
@@ -126,7 +124,8 @@ namespace Yatzy.Logic.Implementations
             player.AllowedCombinations[answer] = true;
         }
 
-        public int CalculateScore(Combinations combinations, List<Dice> diceResult)
+        // TODO Move this to another class
+        public int CalculateScore(Combinations combinations, IEnumerable<Dice> diceResult)
         {
             if (combinations != Combinations.FullHouse)
             {
@@ -136,6 +135,13 @@ namespace Yatzy.Logic.Implementations
             {
                 return diceResult.Sum(d => d.Value);
             }
+        }
+
+        public void EndTurnPrint(IEnumerable<Dice> diceResult)
+        {
+            consoleWrapper.Print("That is your result:");
+            this.diceFacade.PrintDice(diceResult);
+            consoleWrapper.Print("Which score do you want to use?");
         }
     }
 }

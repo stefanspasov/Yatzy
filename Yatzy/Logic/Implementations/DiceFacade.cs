@@ -56,7 +56,7 @@ namespace Yatzy
                 || (diceResult.GetRange(0, 2).DistinctBy(d => d.Value).Count() == 1 && diceResult.GetRange(2, 3).DistinctBy(d => d.Value).Count() == 1));
         }
 
-        public void PrintDice(IList<Dice> diceList)
+        public void PrintDice(IEnumerable<Dice> diceList)
         {
             foreach (var dice in diceList)
             {

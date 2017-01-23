@@ -3,7 +3,7 @@ using Yatzy.Models;
 
 namespace Yatzy.Logic.Factories.Implementations
 {
-    class DiceFactory : IDiceFactory
+    public class DiceFactory : IDiceFactory
     {
         static Dictionary<int, string> DiceFaces = new Dictionary<int, string>
         {

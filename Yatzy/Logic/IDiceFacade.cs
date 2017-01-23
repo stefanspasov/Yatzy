@@ -3,7 +3,7 @@ using Yatzy.Models;
 
 namespace Yatzy.Logic
 {
-    interface IDiceFacade
+    public interface IDiceFacade
     {
         IList<Dice> RollDice(int diceAmount);
 
@@ -11,6 +11,6 @@ namespace Yatzy.Logic
 
         bool IsFullHouse(List<Dice> diceResult);
 
-        void PrintDice(IList<Dice> diceList);
+        void PrintDice(IEnumerable<Dice> diceList);
     }
 }

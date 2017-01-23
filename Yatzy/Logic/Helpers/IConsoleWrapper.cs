@@ -1,6 +1,6 @@
 ﻿namespace Yatzy.Logic.Helpers
 {
-    interface IConsoleWrapper
+    public interface IConsoleWrapper
     {
         void Print(string text, bool typeOut = true);
 

@@ -1,6 +1,6 @@
 ﻿namespace Yatzy.Models
 {
-    class Dice
+    public class Dice
     {
         public readonly int Value;
         public readonly string Face;

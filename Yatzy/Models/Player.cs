@@ -2,7 +2,7 @@
 
 namespace Yatzy.Models
 {
-    class Player
+    public class Player
     {
         public Player()
         {

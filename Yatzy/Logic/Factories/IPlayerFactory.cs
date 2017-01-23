@@ -4,7 +4,7 @@ using Yatzy.Models;
 
 namespace Yatzy.Logic.Factories
 {
-    interface IPlayerFactory
+    public interface IPlayerFactory
     {
         IEnumerable<Player> GetPlayers(int playersAmount);
     }

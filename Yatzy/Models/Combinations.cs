@@ -1,6 +1,6 @@
 ﻿namespace Yatzy.Models
 {
-    enum Combinations
+    public enum Combinations
     {
         Ones = 1,
         Twos = 2,
