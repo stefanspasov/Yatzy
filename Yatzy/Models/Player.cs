@@ -14,7 +14,7 @@ namespace Yatzy.Models
                 { Combinations.Fours, false },
                 { Combinations.Fives, false },
                 { Combinations.Sixes, false },
-                { Combinations.House, false },
+                { Combinations.FullHouse, false },
             };
         }
 

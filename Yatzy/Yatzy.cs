@@ -2,41 +2,39 @@
 using System.Diagnostics;
 using System.Threading;
 using Yatzy.Logic.Factories.Implementations;
-using Yatzy.Logic.Implementations;
+using Yatzy.Logic.Helpers;
+using Yatzy.Logic.Helpers.Implementations;
 
 namespace Yatzy
 {
     class Yatzy
     {
+        static IConsoleWrapper consoleWrapper;
+
         static void Main(string[] args)
         {
+            consoleWrapper = new ConsoleWrapper();
+
             try
             {
                 while (true)
                 {
-                    Console.WriteLine("Do you want to play a game of Yatzy? Yes/No");
-                    var input = Console.ReadLine();
+                    // TODO Localize all texts and move them to DB/Resources...
+                    consoleWrapper.Print("Do you want to play a game of Yatzy? Yes/No");
+                    var input = consoleWrapper.GetLine();
                     if (!string.IsNullOrWhiteSpace(input))
                     {
                         input = input.Trim().ToLowerInvariant();
                         if (input == "yes")
                         {
-                            Console.WriteLine("How many players?");
-                            var numberOfPlayersInput = Console.ReadLine();
-                            int numberOfPlayers;
-                            if (int.TryParse(numberOfPlayersInput, out numberOfPlayers) && numberOfPlayers > 0)
-                            {
-                                var game = new GameHandler(new DiceFacade(new DiceFactory()), new PlayerFactory());
-                                game.Start(numberOfPlayers);
-                            }
-                            else
-                            {
-                                Console.WriteLine("Players should be a positive integer.");
-                            }
+                            consoleWrapper.Print("How many players?");
+                            var numberOfPlayers = consoleWrapper.GetInt();
+                            var game = GameHandlerFactory.Create();
+                            game.Start(numberOfPlayers);
                         }
                         else if(input == "no")
                         {
-                            Console.WriteLine("Goodbye!");
+                            consoleWrapper.Print("Goodbye!");
                             Thread.Sleep(1000);
                             Environment.Exit(0);
                         }

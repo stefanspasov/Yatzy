@@ -1,68 +1,80 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Yatzy.Logic.Factories;
+using Yatzy.Logic.Helpers;
 using Yatzy.Models;
 
 namespace Yatzy.Logic.Implementations
 {
     class GameHandler
     {
-        private readonly IDiceFacade DiceFacade;
-        private readonly IPlayerFactory PlayerFactory;
+        private readonly IDiceFacade diceFacade;
+        private readonly IPlayerFactory playerFactory;
         private IList<Player> Players;
+        private IConsoleWrapper consoleWrapper;
         private const int InitialDice = 5;
         private const int InitialRerolls = 3;
 
-        public GameHandler(IDiceFacade diceFacade, IPlayerFactory playerFactory)
+        public GameHandler(IConsoleWrapper consoleWrapper, IDiceFacade diceFacade, IPlayerFactory playerFactory)
         {
-            this.DiceFacade = diceFacade;
-            this.PlayerFactory = playerFactory;
+            if (consoleWrapper == null)
+            {
+                throw new ArgumentNullException(nameof(consoleWrapper));
+            }
+            if (diceFacade == null)
+            {
+                throw new ArgumentNullException(nameof(diceFacade));
+            }
+            if (playerFactory == null)
+            {
+                throw new ArgumentNullException(nameof(playerFactory));
+            }
+            this.consoleWrapper = consoleWrapper;
+            this.diceFacade = diceFacade;
+            this.playerFactory = playerFactory;
         }
 
         public void Start(int numberOfPlayers)
         {
-            Players = this.PlayerFactory.GetPlayers(numberOfPlayers) as IList<Player>;
+            Players = this.playerFactory.GetPlayers(numberOfPlayers) as IList<Player>;
             for (int i = 0; i < Players.Count(); i++)
             {
-                if (i==Players.Count() - 1 && !Players[i].AllowedCombinations.Any(ac => ac.Value == false))
-                {
-                    break;
-                }
-
+                consoleWrapper.Print($"{Players[i].PlayerName}'s turn! Score:{Players[i].Score}\n");
+                Thread.Sleep(500);
                 MakeATurn(Players[i]);
+                if (i == Players.Count() - 1 && Players[i].AllowedCombinations.Any(ac => ac.Value == false))
+                {
+                    i = -1;
+                }
             }
 
-            Console.WriteLine("Game ends");
+            var winner = Players.OrderByDescending(p => p.Score).First();
+            consoleWrapper.Print($"Game over. Winner is {winner.PlayerName} with score: {winner.Score}");
         }
 
         public void MakeATurn(Player player)
         {
-            var result = new List<Dice>();
+            var diceResult = new List<Dice>();
             var rerollsLeft = InitialRerolls;
             var availableDiceToRoll = InitialDice;
+            IList<Dice> currentRolledDiceList = null;
 
-            while(rerollsLeft > 0 && availableDiceToRoll > 0)
+            while (rerollsLeft > 0 && availableDiceToRoll > 0)
             {
-                var currentRolledDiceList = this.DiceFacade.RollDice(availableDiceToRoll);
-
-                // TODO Implement IPrinter or logger whatever - something testable
-                // TODO Print dice result in another method
-                foreach (var dice in currentRolledDiceList)
-                {
-                    Console.WriteLine(dice.Face + "\n");
-                }
+                currentRolledDiceList = this.diceFacade.RollDice(availableDiceToRoll);
+                this.diceFacade.PrintDice(currentRolledDiceList);
 
                 while (true)
                 {
-                    Console.WriteLine($"How many dice do you want to reroll? [0-{availableDiceToRoll}]");
-                    var input = Console.ReadLine();
-                    int rerollDiceAmount;
-                    if (int.TryParse(input, out rerollDiceAmount) && availableDiceToRoll >= rerollDiceAmount && rerollDiceAmount >= 0)
+                    consoleWrapper.Print($"How many dice do you want to reroll? [0-{availableDiceToRoll}]");
+                    var rerollDiceAmount = consoleWrapper.GetInt();
+                    if (availableDiceToRoll >= rerollDiceAmount)
                     {
                         if (rerollDiceAmount == 0)
                         {
-                            result.AddRange(currentRolledDiceList);
+                            diceResult.AddRange(currentRolledDiceList);
                             rerollsLeft = 0;
                         }
                         else
@@ -70,13 +82,11 @@ namespace Yatzy.Logic.Implementations
                             if (rerollDiceAmount < availableDiceToRoll)
                             {
                                 var positions = new int[(availableDiceToRoll - rerollDiceAmount)];
-                                Console.WriteLine($"Which dice do you want to keep? By indexes: [0 - {availableDiceToRoll-1}]");
+                                consoleWrapper.Print($"Which dice do you want to keep? By indexes: [0 - {availableDiceToRoll-1}]");
                                 for (int i = 0; i < positions.Length; i++)
                                 {
-                                    // TODO Parse to an int
-                                    var dicePosition = Console.ReadKey();
-                                    Console.WriteLine();
-                                    result.Add(currentRolledDiceList[i]);
+                                    var dicePosition = consoleWrapper.GetInt();
+                                    diceResult.Add(currentRolledDiceList[dicePosition]);
                                 }
 
                                 availableDiceToRoll -= (availableDiceToRoll - rerollDiceAmount);
@@ -90,43 +100,42 @@ namespace Yatzy.Logic.Implementations
                 rerollsLeft--;
             }
 
-            Console.WriteLine("That is your result");
-            foreach (var dice in result)
+            if (diceResult.Count() < InitialDice)
             {
-                Console.WriteLine(dice.Face);
-                Console.WriteLine();
+                diceResult.AddRange(currentRolledDiceList);
             }
 
-            Console.WriteLine("Which score do you want to use?");
+            EndTurn(diceResult, player);
+        }
+
+        private void EndTurn(List<Dice> diceResult, Player player)
+        {
+            consoleWrapper.Print("That is your result:");
+            this.diceFacade.PrintDice(diceResult);
+            consoleWrapper.Print("Which score do you want to use?");
             foreach (var item in player.AllowedCombinations.Where(ac => ac.Value == false))
             {
-                if (item.Key == Combinations.House)
+                if ((item.Key == Combinations.FullHouse && this.diceFacade.IsFullHouse(diceResult)) || item.Key != Combinations.FullHouse)
                 {
-                    result.OrderBy(d => d.Value);
-                    if ((result.GetRange(0, 2).Distinct().Count() == 1 && result.GetRange(3, 4).Distinct().Count() == 1)
-                        || (result.GetRange(0, 1).Distinct().Count() == 1 && result.GetRange(2, 4).Distinct().Count() == 1))
-                    {
-                        Console.WriteLine(item.Key.ToString());
-
-                    }
-                }
-                else
-                {
-                    Console.WriteLine(item.Key.ToString());
+                    consoleWrapper.Print(item.Key.ToString() + " " + (int)item.Key);
                 }
             }
 
-            var answer = int.Parse(Console.ReadLine());
-            if ((Combinations)answer != Combinations.House)
+            var answer = (Combinations)int.Parse(consoleWrapper.GetLine());
+            player.Score += CalculateScore(answer, diceResult);
+            player.AllowedCombinations[answer] = true;
+        }
+
+        public int CalculateScore(Combinations combinations, List<Dice> diceResult)
+        {
+            if (combinations != Combinations.FullHouse)
             {
-                player.Score = result.Where(d => d.Value == answer).Sum(d => d.Value);
+                return diceResult.Where(d => d.Value == (int)combinations).Sum(d => d.Value);
             }
             else
             {
-                player.Score = result.Sum(d => d.Value);
+                return diceResult.Sum(d => d.Value);
             }
-
-            player.AllowedCombinations[(Combinations)answer] = true;
         }
     }
 }

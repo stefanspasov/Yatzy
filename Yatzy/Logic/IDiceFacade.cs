@@ -8,5 +8,9 @@ namespace Yatzy.Logic
         IList<Dice> RollDice(int diceAmount);
 
         Dice RollSingleDice();
+
+        bool IsFullHouse(List<Dice> diceResult);
+
+        void PrintDice(IList<Dice> diceList);
     }
 }
